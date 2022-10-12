@@ -9,7 +9,8 @@ public class Quiz : MonoBehaviour
 
     [Header("Questions")]
     [SerializeField] TextMeshProUGUI questionText;
-    [SerializeField] QuestionSO question;
+    [SerializeField] List<QuestionSO>questions = new List<QuestionSO>();
+    QuestionSO currentQuestion;
 
     [Header("Answers")]
     [SerializeField] GameObject[] answerButtons; 
@@ -29,8 +30,6 @@ public class Quiz : MonoBehaviour
     void Start()
     {
         timer = FindObjectOfType<Timer>();
-        GetNextQuestion();
-        //DisplayQuestion();
     }
 
     void Update() 
@@ -62,12 +61,12 @@ public class Quiz : MonoBehaviour
 
     void DisplayQuestion()
     {
-        questionText.text = question.GetQuestion();
+        questionText.text = currentQuestion.GetQuestion();
 
         for(int i = 0; i <answerButtons.Length ;i++)
         {
             TextMeshProUGUI buttonText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-            buttonText.text = question.getAnswer(i);
+            buttonText.text = currentQuestion.getAnswer(i);
 
         }
 
@@ -77,7 +76,7 @@ public class Quiz : MonoBehaviour
     {
         Image buttonImage;
 
-        if(index == question.GetCorrectAnsweIndex())
+        if(index == currentQuestion.GetCorrectAnsweIndex())
         {
             questionText.text = "Correct!";
             buttonImage = answerButtons[index].GetComponent<Image>();
@@ -86,8 +85,8 @@ public class Quiz : MonoBehaviour
         }
         else
         {
-            correctAnswerIndex = question.GetCorrectAnsweIndex();
-            string correctAnswer = question.getAnswer(correctAnswerIndex);
+            correctAnswerIndex = currentQuestion.GetCorrectAnsweIndex();
+            string correctAnswer = currentQuestion.getAnswer(correctAnswerIndex);
             questionText.text = "Sorry, the correct answer was;\n" + correctAnswer;
 
             buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
@@ -107,9 +106,26 @@ public class Quiz : MonoBehaviour
 
     void GetNextQuestion()
     {
-        SetButtonState(true);
-        setDefaultButtonSprites();
-        DisplayQuestion();
+        if(questions.Count > 0)
+        {
+            SetButtonState(true);
+            setDefaultButtonSprites();
+            GetRandomQuestion();
+            DisplayQuestion();
+        }
+        
+    }
+
+    void GetRandomQuestion()
+    {
+        int index = Random.Range(0,questions.Count);
+        currentQuestion = questions[index];
+
+        if(questions.Contains(currentQuestion))
+        {
+            questions.Remove(currentQuestion);
+        }
+        
     }
 
     void setDefaultButtonSprites()
@@ -120,4 +136,8 @@ public class Quiz : MonoBehaviour
             buttonImage.sprite = defaultAnswerSprite;
         }
     }
+
+
+
+
 }
